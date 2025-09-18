@@ -1,7 +1,7 @@
 熊出没注意:
   template: |
     【{{ keyword }}】
-    {{ datetime }}、{{ location }}で熊の目撃情報がありました。
+    {{ datetime }}ごろ、{{ location }}で熊の目撃情報がありました。
     {{ url }}
     {{ extra }}
 

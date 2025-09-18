@@ -1,5 +1,0 @@
-Flask
-tweepy
-python-dotenv
-PyYAML
-line-bot-sdk
