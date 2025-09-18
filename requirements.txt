@@ -1,0 +1,6 @@
+Flask
+requests
+tweepy
+python-dotenv
+pyyaml
+jinja2
