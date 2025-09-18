@@ -1,5 +1,5 @@
 Flask
-python-dotenv
 tweepy
+python-dotenv
 PyYAML
-jinja2
+line-bot-sdk

@@ -1,0 +1,13 @@
+熊出没注意:
+  template: |
+    【{{ keyword }}】
+    {{ datetime }}、{{ location }}で熊の目撃情報がありました。
+    {{ url }}
+    {{ extra }}
+
+未定義:
+  template: |
+    【{{ keyword }}】
+    {{ datetime }}、{{ location }}で情報がありました。
+    {{ url }}
+    {{ extra }}
