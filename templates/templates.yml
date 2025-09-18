@@ -1,8 +1,8 @@
 熊出没注意:
   template: |
     【{{ keyword }}】
-    {{ datetime }}、{{ location }}で熊の目撃情報がありました。
-    {{ link }}
+    {{ datetime }}ごろ、{{ location }}で熊の目撃情報がありました。
+    {{ url_or_note }}
 
     熊出没マップ（長野県塩尻市）
     https://www.google.com/maps/d/viewer?mid=1kYo2bY6H0ryXyAttzk07HzHkCltnD58&usp=sharing
@@ -11,5 +11,5 @@
   template: |
     【{{ keyword }}】
     {{ datetime }}、{{ location }}で情報がありました。
-    {{ link }}
+    {{ url_or_note }}
     {{ extra }}

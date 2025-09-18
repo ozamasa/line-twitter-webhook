@@ -31,13 +31,7 @@ def post_tweet(text: str):
         return {"code": 200, "tweet_id": response.data.get("id")}
     except tweepy.TweepyException as e:
         print(f"[Tweet Error] {e.response.status_code} {e.response.text}")
-        return {
-            "code": e.response.status_code,
-            "error": e.response.text
-        }
+        return {"code": e.response.status_code, "error": e.response.text}
     except Exception as e:
         print(f"[Tweet Error] {type(e).__name__}: {e}")
-        return {
-            "code": 500,
-            "error": f"Tweet failed: {e}"
-        }
+        return {"code": 500, "error": str(e)}
