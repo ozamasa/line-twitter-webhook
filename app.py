@@ -4,7 +4,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
-from utils.twitter import post_tweet
+from utils.twitter import post_tweet  # ハイブリッド版を維持
 from datetime import datetime
 
 app = Flask(__name__)
@@ -53,11 +53,10 @@ def handle_message(event):
 
     try:
         dt = datetime.strptime(date_str, "%Y%m%d%H%M")
-        datetime_str = dt.strftime("%Y年%m月%d日%H時%M分ごろ")
+        datetime_str = dt.strftime("%Y年%m月%d日%H時%M分")
     except ValueError:
         datetime_str = date_str
 
-    # テンプレート取得（定義なければ未定義を使用）
     template_info = templates.get(keyword, templates.get("未定義"))
     template = template_info["template"]
 
@@ -69,7 +68,7 @@ def handle_message(event):
         extra=extra
     )
 
-    print(f"[Tweet] Text: {tweet_text}")
+    print("[Tweet] Text:", tweet_text)
     result = post_tweet(tweet_text)
     print("[Result]", result)
 
