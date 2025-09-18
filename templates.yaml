@@ -4,6 +4,8 @@
     {datetime}ごろ、{location}で熊の目撃情報がありました。
     {url}
     {extra}
+    熊出没マップ（長野県塩尻市）
+    https://www.google.com/maps/d/viewer?mid=1kYo2bY6H0ryXyAttzk07HzHkCltnD58&usp=sharing
 
 未定義:
   template: |
