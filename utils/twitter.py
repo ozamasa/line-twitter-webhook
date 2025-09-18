@@ -1,49 +1,50 @@
-
 import os
 import tweepy
-from dotenv import load_dotenv
 
-load_dotenv()
+def post_tweet(text, media_path=None):
+    # 認証情報の取得
+    consumer_key = os.getenv("TWITTER_API_KEY")
+    consumer_secret = os.getenv("TWITTER_API_SECRET")
+    access_token = os.getenv("TWITTER_ACCESS_TOKEN")
+    access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+    bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
 
-CONSUMER_KEY        = os.getenv("TWITTER_CONSUMER_KEY")
-CONSUMER_SECRET     = os.getenv("TWITTER_CONSUMER_SECRET")
-ACCESS_TOKEN        = os.getenv("TWITTER_ACCESS_TOKEN")
-ACCESS_TOKEN_SECRET = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+    if not all([consumer_key, consumer_secret, access_token, access_token_secret, bearer_token]):
+        print("[Error] Twitter API credentials are missing.")
+        return False
 
-auth = tweepy.OAuth1UserHandler(
-    CONSUMER_KEY,
-    CONSUMER_SECRET,
-    ACCESS_TOKEN,
-    ACCESS_TOKEN_SECRET
-)
-api_v1 = tweepy.API(auth)
+    # v1.1 用 (media upload)
+    auth_v1 = tweepy.OAuth1UserHandler(
+        consumer_key, consumer_secret, access_token, access_token_secret
+    )
+    api_v1 = tweepy.API(auth_v1)
 
-client_v2 = tweepy.Client(
-    consumer_key=CONSUMER_KEY,
-    consumer_secret=CONSUMER_SECRET,
-    access_token=ACCESS_TOKEN,
-    access_token_secret=ACCESS_TOKEN_SECRET
-)
+    # v2 用 (tweet post)
+    client_v2 = tweepy.Client(
+        bearer_token=bearer_token,
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret
+    )
 
-def post_tweet_with_media(text: str, media_path: str):
-    print(f"[Tweet] Text: {text[:30]}... Media: {media_path}")
-
-    try:
-        media_id = None
-        if media_path:
+    media_id = None
+    if media_path:
+        try:
             media = api_v1.media_upload(media_path)
             media_id = media.media_id
-    except Exception as e:
-        print(f"[Upload Error] {type(e).__name__}: {e}")
-        return {"code": 500, "error": f"Upload failed: {e}"}
+            print("[Media] Uploaded:", media_path)
+        except Exception as e:
+            print("[Media] Upload failed:", e)
+            return False
 
     try:
-        response = client_v2.create_tweet(text=text, media_ids=[media_id] if media_id else None)
-        print(f"[Tweet OK] id={response.data.get('id')}")
-        return {"code": 200, "tweet_id": response.data.get("id")}
-    except tweepy.TweepyException as e:
-        print(f"[Tweet Error] {e.response.status_code} {e.response.text}")
-        return {"code": e.response.status_code, "error": e.response.text}
+        if media_id:
+            response = client_v2.create_tweet(text=text, media_ids=[media_id])
+        else:
+            response = client_v2.create_tweet(text=text)
+        print("[Tweet] Posted successfully:", response)
+        return True
     except Exception as e:
-        print(f"[Tweet Error] {type(e).__name__}: {e}")
-        return {"code": 500, "error": f"Tweet failed: {e}"}
+        print("[Tweet] Failed to post:", e)
+        return False
