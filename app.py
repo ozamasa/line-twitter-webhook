@@ -64,3 +64,6 @@ def reply_to_line(reply_token: str, text: str):
     }
     r = requests.post("https://api.line.me/v2/bot/message/reply", headers=headers, json=payload)
     print("[LINE reply status]", r.status_code, r.text)
+
+if __name__ == "__main__":
+    app.run()
