@@ -2,28 +2,41 @@ import os
 import tweepy
 
 def post_tweet(text, media_path=None):
-    # 環境変数からトークン取得（v1.1用）
+    # 認証情報の取得
     consumer_key = os.getenv("TWITTER_CONSUMER_KEY")
     consumer_secret = os.getenv("TWITTER_CONSUMER_SECRET")
     access_token = os.getenv("TWITTER_ACCESS_TOKEN")
     access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
-    if not all([consumer_key, consumer_secret, access_token, access_token_secret]):
-        print("[Error] Twitter API credentials are missing.")
-        return False
-
-    # OAuth1 認証（v1.1）
-    auth = tweepy.OAuth1UserHandler(
+    # v1.1 用 (media upload)
+    auth_v1 = tweepy.OAuth1UserHandler(
         consumer_key, consumer_secret, access_token, access_token_secret
     )
-    api = tweepy.API(auth)
+    api_v1 = tweepy.API(auth_v1)
+
+    # v2 用 (tweet post)
+    client_v2 = tweepy.Client(
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret
+    )
+
+    media_id = None
+    if media_path:
+        try:
+            media = api_v1.media_upload(media_path)
+            media_id = media.media_id
+            print("[Media] Uploaded:", media_path)
+        except Exception as e:
+            print("[Media] Upload failed:", e)
+            return False
 
     try:
-        if media_path:
-            media = api.media_upload(media_path)
-            response = api.update_status(status=text, media_ids=[media.media_id])
+        if media_id:
+            response = client_v2.create_tweet(text=text, media_ids=[media_id])
         else:
-            response = api.update_status(status=text)
+            response = client_v2.create_tweet(text=text)
         print("[Tweet] Posted successfully:", response)
         return True
     except Exception as e:
