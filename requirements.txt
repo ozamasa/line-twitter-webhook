@@ -5,3 +5,4 @@ tweepy
 PyYAML
 gspread
 google-auth
+requests

@@ -1,5 +1,6 @@
 import os
 import yaml
+import requests
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -25,6 +26,14 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # テンプレート読み込み
 with open("templates.yaml", encoding="utf-8") as f:
     templates = yaml.safe_load(f)
+
+def resolve_redirect(url):
+    try:
+        response = requests.get(url, allow_redirects=True, timeout=5)
+        return response.url
+    except Exception as e:
+        print("[Error] Failed to resolve redirect:", e)
+        return url  # fallback
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -62,10 +71,7 @@ def handle_message(event):
     template_info = templates.get(keyword, templates.get("未定義"))
     template = template_info["template"]
 
-    if location == "ツイートなし":
-        should_tweet = False
-    else:
-        should_tweet = True
+    should_tweet = location != "ツイートなし"
 
     if should_tweet:
         tweet_text = template.format(
@@ -84,8 +90,10 @@ def handle_message(event):
 
     if result:
         try:
-            parsed = urlparse(url)
-            if "google.com/maps" in url and ("q=" in url or "ll=" in url):
+            resolved_url = resolve_redirect(url)
+            parsed = urlparse(resolved_url)
+
+            if "google.com/maps" in parsed.netloc and ("q=" in parsed.query or "ll=" in parsed.query):
                 query = parse_qs(parsed.query)
                 latlng = query.get("q") or query.get("ll")
                 if latlng:
@@ -94,6 +102,7 @@ def handle_message(event):
                     lat, lng = "", ""
             else:
                 lat, lng = "", ""
+
         except Exception as e:
             print("[Error] Failed to parse coordinates:", e)
             lat, lng = "", ""
