@@ -3,3 +3,5 @@ line-bot-sdk
 python-dotenv
 tweepy
 PyYAML
+gspread
+google-auth
