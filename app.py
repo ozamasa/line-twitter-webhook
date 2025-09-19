@@ -56,7 +56,7 @@ def handle_message(event):
     # 日時文字列フォーマット
     try:
         dt = datetime.strptime(date_str, "%Y%m%d%H%M")
-        datetime_str = dt.strftime("%Y年%m月%d日%H時%M分")
+        datetime_str = dt.strftime("%Y/%m/%d %H:%M")
     except ValueError:
         datetime_str = date_str
 
@@ -87,7 +87,7 @@ def handle_message(event):
         time_period = determine_time_period(date_str)
 
         if lat and lng and time_period:
-            append_to_sheet([date_str, lat, lng, time_period])
+            append_to_sheet([datetime_str, lat, lng, time_period])
         else:
             print("[Skipped] Missing lat/lng/time_period, not writing to spreadsheet.")
 
