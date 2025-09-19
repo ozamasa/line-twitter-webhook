@@ -4,7 +4,9 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
-from utils.twitter import post_tweet  # ハイブリッド版を維持
+from utils.twitter import post_tweet
+from utils.sheets import append_to_spreadsheet
+from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
 app = Flask(__name__)
@@ -71,6 +73,43 @@ def handle_message(event):
     print("[Tweet] Text:", tweet_text)
     result = post_tweet(tweet_text)
     print("[Result]", result)
+
+    if result:
+        try:
+            parsed = urlparse(url)
+            if "google.com/maps" in url and ("q=" in url or "ll=" in url):
+                query = parse_qs(parsed.query)
+                latlng = query.get("q") or query.get("ll")
+                if latlng:
+                    lat, lng = latlng[0].split(",")
+                else:
+                    lat, lng = "", ""
+            else:
+                lat, lng = "", ""
+        except Exception as e:
+            print("[Error] Failed to parse coordinates:", e)
+            lat, lng = "", ""
+
+        try:
+            dt = datetime.strptime(date_str, "%Y%m%d%H%M")
+            datetime_str = dt.strftime("%Y/%m/%d %H:%M")
+
+            hour = dt.hour
+            if 6 <= hour < 12:
+                time_period = "午前"
+            elif 12 <= hour < 19:
+                time_period = "午後"
+            else:
+                time_period = "夜"
+
+        except ValueError:
+            datetime_str = date_str
+            time_period = ""
+
+        if lat and lng and time_period:
+            append_to_spreadsheet([date_str, lat, lng, time_period])
+        else:
+            print("[Skipped] Missing lat/lng/time_period, not writing to spreadsheet.")
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
