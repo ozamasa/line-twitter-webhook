@@ -5,7 +5,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage
 from utils.twitter import post_tweet
-from utils.sheets import append_to_spreadsheet
+from utils.sheets import append_to_sheet
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
@@ -62,17 +62,25 @@ def handle_message(event):
     template_info = templates.get(keyword, templates.get("未定義"))
     template = template_info["template"]
 
-    tweet_text = template.format(
-        keyword=keyword,
-        datetime=datetime_str,
-        location=location,
-        url=url,
-        extra=extra
-    )
+    if location == "ツイートなし":
+        should_tweet = False
+    else:
+        should_tweet = True
 
-    print("[Tweet] Text:", tweet_text)
-    result = post_tweet(tweet_text)
-    print("[Result]", result)
+    if should_tweet:
+        tweet_text = template.format(
+            keyword=keyword,
+            datetime=datetime_str,
+            location=location,
+            url=url,
+            extra=extra
+        )
+
+        print("[Tweet] Text:", tweet_text)
+        result = post_tweet(tweet_text)
+        print("[Result]", result)
+    else:
+        result = True
 
     if result:
         try:
@@ -107,7 +115,7 @@ def handle_message(event):
             time_period = ""
 
         if lat and lng and time_period:
-            append_to_spreadsheet([date_str, lat, lng, time_period])
+            append_to_sheet([date_str, lat, lng, time_period])
         else:
             print("[Skipped] Missing lat/lng/time_period, not writing to spreadsheet.")
 
